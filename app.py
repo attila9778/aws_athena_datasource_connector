@@ -20,7 +20,6 @@ db_stack.add_dependency(db_network_stack)
 
 AthenaDataSourceConnectorStack(app, "AthenaDataSourceConnectorStack", env=env)
 
-# PocStack(app, "PocStack", env=env)
 app.synth()
 
 # TODO: documentation REAMDME.md and Medium, refer each one
