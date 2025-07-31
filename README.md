@@ -83,17 +83,7 @@ def read_only_user_secret(...) -> aws_secretsmanager.Secret:
 ### !Important! 
 Set up IAM permission for connector Lambda to write to Spill Bucket
 ```python
-connector_role.add_to_policy(
-    statement=aws_iam.PolicyStatement(
-        sid="SpillBucketAccess",
-        resources=[spill_bucket.bucket_arn, f"{spill_bucket.bucket_arn}/*"],
-        actions=[
-            ...
-            "s3:Put*",
-            "s3:DeleteObject*",
-        ],
-    )
-)
+
 ```
 
 ## TL;DR The Story behind
@@ -108,19 +98,19 @@ To do so I needed to set up a Data Source Connector for Athena.
 For the first attempt I went to the management console I put 
 managed to quickly set it up by using clickops.
 
-Here is the guide I used that gave me support on the journey:
+Here is the [guide](https://medium.com/piateamtech/how-to-use-athena-jdbc-connector-for-rds-database-from-athena-on-aws-environment-25c282b6fdc2) I used that gave me support on the journey:
 
 
 The next step was implementing using Python CDK which seemed
 a harder problem. First thing I looked at was the documentation
-of the data source connector itself, but I found only Level 1 Cfn
-construct. Also, to create the connector I needed an AWS Lambda
+of the data source connector itself, but I found only [Level 1 Cfn
+construct that](https://docs.aws.amazon.com/cdk/api/v2/python/aws_cdk.aws_appconfig/CfnApplication.html) is vaguely documented. Also, to create the connector I needed an AWS Lambda
 Function wrapped in AWS SAM (Serverless Application Model), which
 seemed like another barely documented service that I had to use.
 At that time LLMs were in their early steps, so I was using the
 OG internet search engine to get an example on implementing it.
 
-Fortunately, I found an example written in TypeScript. Strangely,
+Fortunately, I found an [example written in TypeScript](https://aws.plainenglish.io/aws-cdk-athena-rds-ddfa2a5859be). Strangely,
 the configuration had to be provided using a JSON dictionary.
 I felt saved. I managed to implement it by translating the 
 Typescript code and using Python CDK contstructs.
@@ -140,8 +130,8 @@ found out that the root cause of the error is the lacking IAM
 permission for the connector Lambda to write to the S3 spill
 bucket.
 
-Queries that have a query result bigger than 2 MB/GB are stored
-in the spill bucket. When the connector was initially tested, we
+Queries that have a query result [bigger than 6 MB are stored
+in the spill bucket](https://repost.aws/questions/QUa5rsUCCaQE-L0_BryLhZ7A/athena-spill-bucket-issue-dynamo-connect-lambda). When the connector was initially tested, we
 used only small queries that did not exceed this limit. After it
 when we were giving it more realistic queries, we hit the limit
 and got the misterious error.
